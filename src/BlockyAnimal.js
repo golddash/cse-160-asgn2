@@ -1,16 +1,4 @@
-// Kevin Chen ASG1 4/13/24
-
-// test again
-
-// var VSHADER_SOURCE = `
-//   attribute vec4 a_Position;
-//   uniform float u_Size;
-//   void main() {
-//     gl_Position = a_Position;
-//     //gl_PointSize = 30.0;
-//     gl_PointSize = u_Size;
-//   }`;
-
+// Kevin Chen 4/28/24
 
 var VSHADER_SOURCE = `
   attribute vec4 a_Position;
@@ -18,8 +6,8 @@ var VSHADER_SOURCE = `
   uniform mat4 u_GlobalRotateMatrix;
   void main() {
     gl_Position = u_GlobalRotateMatrix * u_ModelMatrix * a_Position;
-   }`
-  
+   }`;
+
 // Fragment shader program
 var FSHADER_SOURCE = `
   precision mediump float;
@@ -70,36 +58,24 @@ function connectVariablesToGLSL() {
     console.log("Failed to get the storage location of u_FragColor");
     return;
   }
-  
-  // // Get the storage location of u_Size
-  // u_Size = gl.getUniformLocation(gl.program, "u_Size");
-  // if (!u_Size) {
-  //   console.log("Failed to get the storage location of u_Size");
-  //   return;
-  // }
 
-  // u_ModelMatrix = gl.getUniformLocation(gl.program, "u_ModelMatrix");
-  // if (!u_ModelMatrix) {
-  //   console.log("Failed to get the storage location of u_ModelMatrix");
-  //   return;
-  // }
+  // Get the storage location of u_ModelMatrix
+  u_ModelMatrix = gl.getUniformLocation(gl.program, "u_ModelMatrix");
+  if (!u_ModelMatrix) {
+    console.log("Failed to get the storage location of u_ModelMatrix");
+    return;
+  }
+  u_GlobalRotateMatrix = gl.getUniformLocation(
+    gl.program,
+    "u_GlobalRotateMatrix"
+  );
+  if (!u_GlobalRotateMatrix) {
+    console.log("Failed to get the storage location of u_GlobalRotateMatrix");
+    return;
+  }
 
-    // Get the storage location of u_ModelMatrix
-    u_ModelMatrix = gl.getUniformLocation(gl.program, 'u_ModelMatrix');
-    if (!u_ModelMatrix) {
-      console.log('Failed to get the storage location of u_ModelMatrix');
-      return;
-    }
-    u_GlobalRotateMatrix = gl.getUniformLocation(gl.program, 'u_GlobalRotateMatrix');
-    if (!u_GlobalRotateMatrix) { 
-      console.log('Failed to get the storage location of u_GlobalRotateMatrix');
-      return;
-    }
-  
-  
   var identityM = new Matrix4();
   gl.uniformMatrix4fv(u_ModelMatrix, false, identityM.elements);
-
 }
 
 // Const
@@ -115,74 +91,40 @@ let g_numSegments = 6;
 let g_globalAngle = 0;
 let g_yellowAngle = 0;
 let g_magentaAngle = 0;
+g_yellowAnimation = false;
+g_magentaAnimation = false;
 
 function addActionsForHtmlUI() {
-  // // Button for Red and Green
-  // document.getElementById("green").onclick = function () {
-  //   g_selectedColor = [0.0, 1.0, 0.0, 1.0];
-  // };
-  // document.getElementById("red").onclick = function () {
-  //   g_selectedColor = [1.0, 0.0, 0.0, 1.0];
-  // };
-
-  // // Sliders for Red Green and Blue
-  // document.getElementById("redSlide").addEventListener("mouseup", function () {
-  //   g_selectedColor[0] = this.value / 100;
-  // });
-  // document
-  //   .getElementById("greenSlide")
-  //   .addEventListener("mouseup", function () {
-  //     g_selectedColor[1] = this.value / 100;
-  //   });
-  // document.getElementById("blueSlide").addEventListener("mouseup", function () {
-  //   g_selectedColor[2] = this.value / 100;
-  // });
-
-  // // Size and segment Slider
-  // document.getElementById("sizeSlide").addEventListener("mouseup", function () {
-  //   g_selectedSize = this.value;
-  // });
-  // document
-  //   .getElementById("segmentSlide")
-  //   .addEventListener("mouseup", function () {
-  //     g_numSegments = this.value;
-  //   });
-
-  // // Clear Button
-  // document.getElementById("clearButton").onclick = function () {
-  //   g_shapeList = [];
-  //   renderAllShapes();
-  // };
-
-  // // Shape button
-  // document.getElementById("pointButton").onclick = function () {
-  //   g_selectedType = POINT;
-  // };
-  // document.getElementById("triangleButton").onclick = function () {
-  //   g_selectedType = TRIANGLE;
-  // };
-  // document.getElementById("circleButton").onclick = function () {
-  //   g_selectedType = CIRCLE;
-  // };
-
-  // // Draw Button
-  // document.getElementById("drawButton").onclick = function () {
-  //   g_shapeList = [];
-  //   drawPicture();
-  // };
-
-  // document.getElementById("awesomeButton").onclick = function () {
-  //   g_shapeList = [];
-  //   generateRandomDrawing();
-  // };
-
   // Camera angle
-  document.getElementById("angleSlide").addEventListener("mousemove", function() {g_globalAngle = this.value; renderAllShapes();});
+  document
+    .getElementById("angleSlide")
+    .addEventListener("mousemove", function () {
+      g_globalAngle = this.value;
+      renderAllShapes();
+    });
 
   // Yellow Joint
-  document.getElementById("yellowSlide").addEventListener("mousemove", function() {g_yellowAngle = this.value; renderAllShapes();});
+  document
+    .getElementById("yellowSlide")
+    .addEventListener("mousemove", function () {
+      g_yellowAngle = this.value;
+      renderAllShapes();
+    });
 
-  document.getElementById("magentaSlide").addEventListener("mousemove", function() {g_magentaAngle = this.value; renderAllShapes();});
+  document
+    .getElementById("magentaSlide")
+    .addEventListener("mousemove", function () {
+      g_magentaAngle = this.value;
+      renderAllShapes();
+    });
+
+  // Button for Yellow Joint
+  document.getElementById("animationYellowOnButton").onclick = function () { g_yellowAnimation = true; };
+  document.getElementById("animationYellowOffButton").onclick = function () { g_yellowAnimation = false; };
+
+  document.getElementById("animationMagentaOnButton").onclick = function () {g_magentaAnimation = true; };
+  document.getElementById("animationMagentaOffButton").onclick = function () { g_magentaAnimation = false; };
+  
 }
 
 function main() {
@@ -230,7 +172,8 @@ function click(ev) {
   point.size = g_selectedSize;
   g_shapeList.push(point);
 
-  renderAllShapes();
+  //renderAllShapes();
+  requestAnimationFrame(tick);
 }
 
 function convertCoordinatesEventToGL(ev) {
@@ -244,9 +187,34 @@ function convertCoordinatesEventToGL(ev) {
   return [x, y];
 }
 
+var g_startTime = performance.now()/1000.0;
+var g_seconds = performance.now()/1000.0 - g_startTime;
+
+function tick() {
+
+  g_seconds = performance.now()/1000.0 - g_startTime;
+  console.log(g_seconds);
+  updateAnimationAngles();
+  renderAllShapes();
+  requestAnimationFrame(tick);
+}
+
+function updateAnimationAngles()
+{
+  if (g_yellowAnimation) {
+    g_yellowAngle = (45*Math.sin(g_seconds));
+  }
+
+  if (g_magentaAnimation) {
+    g_magentaAngle = 45*Math.sin(3*g_seconds);
+  
+  }
+
+  
+}
+
+
 function renderAllShapes() {
-
-
   var globalRotMat = new Matrix4().rotate(g_globalAngle, 0, 1, 0);
   gl.uniformMatrix4fv(u_GlobalRotateMatrix, false, globalRotMat.elements);
 
@@ -256,181 +224,27 @@ function renderAllShapes() {
 
   var body = new Cube();
   body.color = [1.0, 0.0, 0.0, 1.0];
-  body.matrix.translate(-.25, -.75, 0.0);
-  body.matrix.rotate(-5, 1,0,0);
+  body.matrix.translate(-0.25, -0.75, 0.0);
+  body.matrix.rotate(-5, 1, 0, 0);
   body.matrix.scale(0.5, 0.3, 0.5);
   body.render();
 
   var leftArm = new Cube();
-  leftArm.color = [1,1,0,1];
-  leftArm.matrix.translate(0,-0.5,0.0);
-  leftArm.matrix.rotate(-5,1,0,0);
+  leftArm.color = [1, 1, 0, 1];
+  leftArm.matrix.translate(0, -0.5, 0.0);
+  leftArm.matrix.rotate(-5, 1, 0, 0);
   leftArm.matrix.rotate(-g_yellowAngle, 0, 0, 1);
   var yellowCoordinatesMat = new Matrix4(leftArm.matrix);
   leftArm.matrix.scale(0.25, 0.7, 0.5);
-  leftArm.matrix.translate(-0.5,0,0);
+  leftArm.matrix.translate(-0.5, 0, 0);
   leftArm.render();
 
   var box = new Cube();
-  box.color = [1,0,1,1];
+  box.color = [1, 0, 1, 1];
   box.matrix = yellowCoordinatesMat;
-  box.matrix.translate(0,0.65,0);
-  box.matrix.rotate(-30, 1, 0, 0);
-  box.matrix.scale(0.2,0.4,0.2);
+  box.matrix.translate(0, 0.65, 0);
+  box.matrix.rotate(g_magentaAngle, 0, 0, 1);
+  box.matrix.scale(0.3, 0.3, 0.3);
+  box.matrix.translate(-0.5, 0, -0.001);
   box.render();
-}
-
-// test add
-
-function drawPicture() {
-  pictureTriangle([-1, 1, -1, -1, 1, 1], [0.529, 0.808, 0.922, 1.0]); // Light blue for the sky
-  pictureTriangle([1, 1, 1, -1, -1, -1], [0.529, 0.808, 0.922, 1.0]); // Light blue for the sky
-
-  // The sun
-  pictureTriangle([1, 1, 1, 0.7, 0.7, 1], [1.0, 1.0, 0.0, 1.0]);
-  pictureTriangle([0.7, 0.7, 1, 0.7, 0.7, 1], [1.0, 1.0, 0.0, 1.0]);
-
-  // Grass patch
-  pictureTriangle([-1, -1, 1, -0.7, 1, -1], [0.0, 0.4, 0.0, 1.0]);
-  pictureTriangle([-1, -1, -1, -0.7, 1, -0.7], [0.0, 0.4, 0.0, 1.0]);
-
-  // Dirt patch
-  pictureTriangle([-1, -0.7, 1, -0.55, 1, -0.7], [0.545, 0.271, 0.075, 1.0]);
-  pictureTriangle([-1, -0.7, -1, -0.55, 1, -0.55], [0.545, 0.271, 0.075, 1.0]);
-
-  // Cloud 1
-  pictureTriangle([-0.6, 0.8, -0.5, 0.78, -0.45, 0.82], [1.0, 1.0, 1.0, 1.0]);
-  pictureTriangle([-0.5, 0.78, -0.45, 0.82, -0.4, 0.8], [1.0, 1.0, 1.0, 1.0]);
-  // Cloud 2
-  pictureTriangle([0.2, 0.65, 0.3, 0.63, 0.35, 0.67], [1.0, 1.0, 1.0, 1.0]);
-  pictureTriangle([0.3, 0.63, 0.35, 0.67, 0.4, 0.65], [1.0, 1.0, 1.0, 1.0]);
-
-  // Cloud 3
-  pictureTriangle([0.6, 0.75, 0.7, 0.73, 0.75, 0.77], [1.0, 1.0, 1.0, 1.0]);
-  pictureTriangle([0.7, 0.73, 0.75, 0.77, 0.8, 0.75], [1.0, 1.0, 1.0, 1.0]);
-  // Cloud 4
-  pictureTriangle([-0.8, 0.55, -0.7, 0.53, -0.65, 0.57], [1.0, 1.0, 1.0, 1.0]);
-  pictureTriangle([-0.7, 0.53, -0.65, 0.57, -0.6, 0.55], [1.0, 1.0, 1.0, 1.0]);
-
-  // Trunk of the tree
-  pictureTriangle(
-    [-0.2, -0.7, -0.15, -0.5, -0.25, -0.5],
-    [0.294, 0.149, 0.0, 1.0]
-  );
-  pictureTriangle(
-    [-0.25, -0.7, -0.15, -0.7, -0.15, -0.5],
-    [0.294, 0.149, 0.0, 1.0]
-  );
-  pictureTriangle(
-    [-0.25, -0.7, -0.2, -0.7, -0.2, -0.5],
-    [0.294, 0.149, 0.0, 1.0]
-  );
-  pictureTriangle(
-    [-0.25, -0.5, -0.15, -0.5, -0.2, -0.3],
-    [0.294, 0.149, 0.0, 1.0]
-  );
-  pictureTriangle(
-    [-0.25, -0.5, -0.3, -0.3, -0.2, -0.3],
-    [0.294, 0.149, 0.0, 1.0]
-  );
-  // Leaves (bottom layer)
-  pictureTriangle(
-    [-0.3, -0.3, -0.2, -0.2, -0.4, -0.2],
-    [0.133, 0.545, 0.133, 1.0]
-  );
-  pictureTriangle(
-    [-0.4, -0.2, -0.2, -0.2, -0.3, -0.1],
-    [0.133, 0.545, 0.133, 1.0]
-  );
-  pictureTriangle(
-    [-0.3, -0.1, -0.2, -0.2, -0.1, -0.2],
-    [0.133, 0.545, 0.133, 1.0]
-  );
-  // Leaves (middle layer)
-  pictureTriangle(
-    [-0.25, -0.3, -0.15, -0.2, -0.35, -0.2],
-    [0.133, 0.545, 0.133, 1.0]
-  );
-  pictureTriangle(
-    [-0.35, -0.2, -0.15, -0.2, -0.25, -0.1],
-    [0.133, 0.545, 0.133, 1.0]
-  );
-  pictureTriangle(
-    [-0.25, -0.1, -0.15, -0.2, -0.05, -0.2],
-    [0.133, 0.545, 0.133, 1.0]
-  );
-  // Leaves (top layer)
-  pictureTriangle(
-    [-0.2, -0.3, -0.1, -0.2, -0.3, -0.2],
-    [0.133, 0.545, 0.133, 1.0]
-  );
-  pictureTriangle(
-    [-0.3, -0.2, -0.1, -0.2, -0.2, -0.1],
-    [0.133, 0.545, 0.133, 1.0]
-  );
-
-  // Bird 1
-  pictureTriangle([0.1, 0.9, 0.12, 0.88, 0.14, 0.9], [0.0, 0.0, 0.0, 1.0]); // Body
-  pictureTriangle([0.12, 0.88, 0.14, 0.9, 0.12, 0.92], [0.0, 0.0, 0.0, 1.0]); // Head
-  pictureTriangle([0.14, 0.9, 0.16, 0.88, 0.18, 0.9], [0.0, 0.0, 0.0, 1.0]); // Wing
-
-  // Bird 2
-  pictureTriangle([-0.1, 0.85, -0.12, 0.83, -0.14, 0.85], [0.0, 0.0, 0.0, 1.0]); // Body
-  pictureTriangle(
-    [-0.12, 0.83, -0.14, 0.85, -0.12, 0.87],
-    [0.0, 0.0, 0.0, 1.0]
-  ); // Head
-  pictureTriangle(
-    [-0.14, 0.85, -0.16, 0.83, -0.18, 0.85],
-    [0.0, 0.0, 0.0, 1.0]
-  ); // Wing
-
-  // Bird 3
-  pictureTriangle([0.05, 0.95, 0.07, 0.93, 0.09, 0.95], [0.0, 0.0, 0.0, 1.0]); // Body
-  pictureTriangle([0.07, 0.93, 0.09, 0.95, 0.07, 0.97], [0.0, 0.0, 0.0, 1.0]); // Head
-  pictureTriangle([0.09, 0.95, 0.11, 0.93, 0.13, 0.95], [0.0, 0.0, 0.0, 1.0]); // Wing
-}
-
-function generateRandomDrawing() {
-  const numShapes = Math.floor(Math.random() * 100) + 50; // Generate 50 to 150 shapes
-
-  for (let i = 0; i < numShapes; i++) {
-    const type = Math.floor(Math.random() * 3); // Randomly select a shape type (0: POINT, 1: TRIANGLE, 2: CIRCLE)
-    const x = Math.random() * 2 - 1;
-    const y = Math.random() * 2 - 1;
-    const color = [Math.random(), Math.random(), Math.random(), 1.0]; // Generate random RGBA color
-    const size = Math.random() * 10 + 1;
-    const rotation = Math.random() * 360;
-    const strokeColor = [Math.random(), Math.random(), Math.random(), 1.0]; // Generate random RGBA stroke color
-    const strokeWidth = Math.random() * 5;
-    const spacingX = Math.random() * 2 - 1;
-    const spacingY = Math.random() * 2 - 1;
-    const sparkleInterval = Math.random() * 500 + 500; // Random sparkle interval
-
-    let shape;
-    if (type === POINT) {
-      shape = new Point();
-    } else if (type === TRIANGLE) {
-      shape = new Triangle();
-    } else {
-      shape = new Circle();
-      shape.segments = Math.floor(Math.random() * 10) + 3; // Random number of segments (3 to 12)
-    }
-
-    shape.position = [x + spacingX, y + spacingY];
-    shape.color = color;
-    shape.size = size;
-    shape.rotation = rotation;
-    shape.strokeColor = strokeColor;
-    shape.strokeWidth = strokeWidth;
-
-    // Add shimmering effect
-    setInterval(() => {
-      shape.color[3] = shape.color[3] === 1.0 ? 0.2 : 1.0; // Toggle transparency between 0.2 and 1.0
-    }, sparkleInterval);
-
-    g_shapeList.push(shape);
-  }
-
-  renderAllShapes();
 }
