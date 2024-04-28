@@ -15,25 +15,55 @@
     <p id="theFPS">XXX</p>
 
     <br>
-    Camera Angle
+  
+    Camera Angle X
     <input
     type="range"
     min="0"
-    max="90"
+    max="360"
     value="5"
+    class="slider"
+    id="angleXSlide">
+
+    <br>
+    Camera Angle Y
+    <input
+    type="range"
+    min="0"
+    max="360"
+    value="1"
     class="slider"
     id="angleSlide"
   />
+  <br>
+  Camera Angle Z
+  <input
+  type="range"
+  min="0"
+  max="360"
+  value="1"
+  class="slider"
+  id="angleZSlide">
   <br>
     Left Arm slider
     <input type="range" min="-45" max="45" value="0" class="slide" id="leftArmSlide">
     <button type="button" id="leftArmOn">ON</button>
     <button type="button" id="leftArmOff">OFF</button>
-  <br><br>
+  <br>
     Left Hand Slider
     <input type="range" min="-45" max="45" value="0" class="slide" id="leftHandSlide">
     <button type="button" id="leftHandOn">ON</button>
     <button type="button" id="leftHandOff">OFF</button>
+    <br>
+    Right Arm Slider
+    <input type="range" min="-45" max="45" value="0" class="slide" id="rightArmSlide">
+    <button type="button" id="rightArmOn">ON</button>
+    <button type="button" id="rightArmOff">OFF</button>
+    <br>
+    Right Hand Slider
+    <input type="range" min="-45" max="45" value="0" class="slide" id="rightHandSlide">
+    <button type="button" id="rightHandOn">ON</button>
+    <button type="button" id="rightHandOff">OFF</button>
 
 <br><br>
 
