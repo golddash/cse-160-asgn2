@@ -226,6 +226,25 @@ function addActionsForHtmlUI() {
     }
   });
 
+  canvas.addEventListener('mousemove', function(ev) {
+    // Calculate rotation angles based on mouse position
+    let xRotation = ev.clientY / canvas.height * 360; // Map y-position to x-rotation (X-axis)
+    let yRotation = ev.clientX / canvas.width * 360; // Map x-position to y-rotation (Y-axis)
+    
+    // Update global rotation angles
+    g_globalAngle = yRotation; // X-axis rotation
+    g_globalAngleX = xRotation; // Y-axis rotation
+    g_globalAngleZ = 0; // Z-axis rotation (assuming Z-axis rotation is not controlled by mouse)
+  });
+
+  document.getElementById("resetButton").addEventListener("click", function() {
+    // Reset global angle variables to initial values
+    g_globalAngle = 0;
+    g_globalAngleX = 0;
+    g_globalAngleZ = 0;
+
+});
+
 }
 
 function main() {
@@ -335,6 +354,9 @@ function renderAllShapes() {
 
   globalRotMat.rotate(g_globalAngleX, 1, 0, 0);
   globalRotMat.rotate(g_globalAngleZ, 0, 0, 1);
+
+
+
 
   gl.uniformMatrix4fv(u_GlobalRotateMatrix, false, globalRotMat.elements);
 
