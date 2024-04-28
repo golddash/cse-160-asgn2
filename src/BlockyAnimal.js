@@ -100,11 +100,17 @@ g_leftHandAngle = 0;
 g_rightHandAngle = 0;
 g_leftLegAngle = 0;
 g_rightLegAngle = 0;
+g_tailAngle = 0;
+g_leftEarAngle = 0;
+g_rightEarAngle = 0;
 
 g_leftArmAnimation = false;
 g_leftHandAnimation = false;
 g_rightArmAnimation = false;
 g_rightHandAnimation = false;
+g_tailAnimation = false;
+g_leftEarAnimation = false;
+g_rightEarAnimation = false;
 
 g_globalAngleX = 0;
 g_globalAngleZ = 0;
@@ -117,15 +123,18 @@ function addActionsForHtmlUI() {
       g_globalAngle = this.value;
       renderAllShapes();
     });
-  
+    // Camera angle X
     document.getElementById("angleXSlide").addEventListener('mousemove', function () { g_globalAngleX = this.value; renderAllShapes(); });
+    // Camera angle Z
     document.getElementById("angleZSlide").addEventListener('mousemove', function () { g_globalAngleZ = this.value; renderAllShapes(); });
 
+  // Left arm slider
   document.getElementById("leftArmSlide").addEventListener("mousemove", function () {
     g_leftArmAngle = this.value;
     renderAllShapes();
   });
 
+  // Feft arm button
   document.getElementById("leftArmOn").onclick = function () {
     g_leftArmAnimation = true;
   };
@@ -134,12 +143,13 @@ function addActionsForHtmlUI() {
     g_leftArmAnimation = false;
   };
 
-
+  // Left hand slider
   document.getElementById("leftHandSlide").addEventListener("mousemove", function () {
     g_leftHandAngle = this.value;
     renderAllShapes();
   });
 
+  // Left hand button
   document.getElementById("leftHandOn").onclick = function () {
     g_leftHandAnimation = true;
   };
@@ -148,11 +158,13 @@ function addActionsForHtmlUI() {
     g_leftHandAnimation = false;
   };
   
+  // Right arm slider
   document.getElementById("rightArmSlide").addEventListener("mousemove", function () {
     g_rightArmAngle = this.value;
     renderAllShapes();
   });
   
+  // Right arm button
   document.getElementById("rightArmOn").onclick = function () {
     g_rightArmAnimation = true;
   };
@@ -161,12 +173,13 @@ function addActionsForHtmlUI() {
     g_rightArmAnimation = false;
   };
   
-  
+  // Right hand slider
   document.getElementById("rightHandSlide").addEventListener("mousemove", function () {
     g_rightHandAngle = this.value;
     renderAllShapes();
   });
-  
+
+  // Right hand button
   document.getElementById("rightHandOn").onclick = function () {
     g_rightHandAnimation = true;
   };
@@ -175,8 +188,43 @@ function addActionsForHtmlUI() {
     g_rightHandAnimation = false;
   };
   
+  // Tail slider
+  document.getElementById("tailSlide").addEventListener("mousemove", function () {
+    g_tailAngle = this.value;
+    renderAllShapes();
+  });
+
+  // Tail button
+  document.getElementById("tailOn").onclick = function () {
+    g_tailAnimation = true;
+  };
+  document.getElementById("tailOff").onclick = function () {  
+    g_tailAnimation = false;
+  }
+
+  // left ear slider
+  document.getElementById("leftEarSlide").addEventListener("mousemove", function () {
+    g_leftEarAngle = this.value;
+    renderAllShapes();
+  });
+
+  // left ear button
+  document.getElementById("leftEarOn").onclick = function () {
+    g_leftEarAnimation = true;
+  };
+  document.getElementById("leftEarOff").onclick = function () {  
+    g_leftEarAnimation = false;
+  }
   
-  
+  // shift click
+
+  canvas.addEventListener("click", function (ev) {
+    if (ev.shiftKey) {
+      g_tailAnimation = true;
+      g_leftEarAnimation = true;
+      
+    }
+  });
 
 }
 
@@ -269,6 +317,13 @@ function updateAnimationAngles()
     g_rightHandAngle = 30 * Math.sin(g_seconds * 2 * Math.PI);
   }
   
+  if (g_tailAnimation) {
+    g_tailAngle = 30 * Math.sin(g_seconds * 2 * Math.PI);
+  }
+
+  if (g_leftEarAnimation) {
+    g_leftEarAngle = 30 * Math.sin(g_seconds * 2 * Math.PI);
+  }
   
 }
 
@@ -299,7 +354,7 @@ function renderAllShapes() {
 
   // Front of Fox Body
   var foxFront = new Cube();
-  foxFront.color = [1,1,1,1];
+  foxFront.color = [0.95, 0.8, 0.6, 1.0];
   foxFront.matrix.translate(0, -0.6, -0.20);
   foxFront.matrix.rotate(0, 1, 0, 0);
   foxFront.matrix.rotate(0, 0, 0, 1);
@@ -324,6 +379,7 @@ function renderAllShapes() {
   var tailMatrix = new Matrix4(foxFront.matrix);
   foxTail.matrix = tailMatrix;
   foxTail.matrix.translate(0.4, 0.2, 2.0);
+  foxTail.matrix.rotate(g_tailAngle, 0, 1, 0);
   foxTail.matrix.rotate(10, 1, 0, 0);
   foxTail.matrix.scale(.2, .2, 2);
   foxTail.render();
@@ -369,6 +425,7 @@ function renderAllShapes() {
   //foxRightHand.matrix.rotate(0,0,1,0);
   foxRightHand.render();
 
+  // Left Leg of Fox
   var foxLeftLeg = new Cube();
   foxLeftLeg.color = [0.4, 0.2, 0.1, 1];
   foxLeftLeg.matrix.translate(0, -.6, -0.10)
@@ -377,6 +434,7 @@ function renderAllShapes() {
   foxLeftLeg.matrix.translate(-1.30, -1.1, -0.9);
   foxLeftLeg.render();
 
+  // Right Leg of Fox
   var foxRightLeg = new Cube();
   foxRightLeg.color = [0.4, 0.2, 0.1, 1];
   foxRightLeg.matrix.translate(0.07, -.61, -0.29)
@@ -384,6 +442,29 @@ function renderAllShapes() {
   foxRightLeg.matrix.scale(0.2, 0.11, .2);
   foxRightLeg.matrix.translate(0,-1,0);
   foxRightLeg.render();
+
+  // Left Ear of Fox
+  var foxLeftEar = new Cone();
+  foxLeftEar.color = [0.4, 0.2, 0.1, 1];
+  foxLeftEar.matrix = attachHead;
+  foxLeftEar.matrix.translate(-0.3, .50, 0);
+  foxLeftEar.matrix.rotate(g_leftEarAngle,2,0,0);
+  foxLeftEar.matrix.rotate(270, 1, 0, 0);
+  
+  foxLeftEar.matrix.scale(.15, .15, .8);
+  foxLeftEar.matrix.translate(3.4, -4, 0.34);
+  foxLeftEar.render();
+
+  // Right Ear of Fox
+  var foxRightEar = new Cone();
+  foxRightEar.color = [0.4, 0.2, 0.1, 1];
+  foxRightEar.matrix = attachHead;
+  foxRightEar.matrix.translate(0.8, 8, -0.2);
+  foxRightEar.matrix.rotate(1, 1, 0, 0);
+  foxRightEar.matrix.scale(1, 2, 1);
+  foxRightEar.matrix.translate(3.4, -4, 0.34);
+  foxRightEar.render();
+  
 
   var duration = performance.now() - startTime;
   sendTextToHTML(" ms: " + Math.floor(duration) + " fps: " + Math.floor(10000 / duration) / 10, "theFPS");

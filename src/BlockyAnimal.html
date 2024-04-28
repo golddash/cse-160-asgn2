@@ -13,9 +13,7 @@
     <br />
 
     <p id="theFPS">XXX</p>
-
-    <br>
-  
+    <p>This is a Fox</p>
     Camera Angle X
     <input
     type="range"
@@ -69,19 +67,23 @@
     <input type="range" min="-45" max="45" value="0" class="slide" id="tailSlide">
     <button type="button" id="tailOn">ON</button>
     <button type="button" id="tailOff">OFF</button>
+    <br>
+    Ear Slider
+    <input type="range" min="-45" max="45" value="0" class="slide" id="leftEarSlide">
+    <button type="button" id="leftEarOn">ON</button>
+    <button type="button" id="leftEarOff">OFF</button>
 
+    <p>NOTE: You have to left click on the black canvas first for animations to work. That is because I programmed it to render when clicked on canvas.</p>
+    <p>If it still doesn't work, try refreshing the browser or using a different browser (chrome, opera, edge, etc.) then left clicking the black canvas. Please let me know if it doesn't work still because it should.</p>
 
 <br><br>
-
-
-
-
 
     <script src="Point.js"></script>
     <script src="Circle.js"></script>
     <script src="Triangle.js"></script>
     <script src="BlockyAnimal.js"></script>
     <script src="Cube.js"></script>
+    <script src="Cone.js"></script>
 
     <script src="../lib/cuon-utils.js"></script>
     <script src="../lib/webgl-debug.js"></script>
