@@ -94,6 +94,16 @@ let g_magentaAngle = 0;
 g_yellowAnimation = false;
 g_magentaAnimation = false;
 
+g_leftArmAngle = 0;
+g_rightArmAngle = 0;
+g_leftHandAngle = 0;
+g_rightHandAngle = 0;
+g_leftLegAngle = 0;
+g_rightLegAngle = 0;
+
+g_leftArmAnimation = false;
+g_leftHandAnimation = false;
+
 function addActionsForHtmlUI() {
   // Camera angle
   document
@@ -103,28 +113,35 @@ function addActionsForHtmlUI() {
       renderAllShapes();
     });
 
-  // Yellow Joint
-  document
-    .getElementById("yellowSlide")
-    .addEventListener("mousemove", function () {
-      g_yellowAngle = this.value;
-      renderAllShapes();
-    });
+  document.getElementById("leftArmSlide").addEventListener("mousemove", function () {
+    g_leftArmAngle = this.value;
+    renderAllShapes();
+  });
 
-  document
-    .getElementById("magentaSlide")
-    .addEventListener("mousemove", function () {
-      g_magentaAngle = this.value;
-      renderAllShapes();
-    });
+  document.getElementById("leftArmOn").onclick = function () {
+    g_leftArmAnimation = true;
+  };
 
-  // Button for Yellow Joint
-  document.getElementById("animationYellowOnButton").onclick = function () { g_yellowAnimation = true; };
-  document.getElementById("animationYellowOffButton").onclick = function () { g_yellowAnimation = false; };
+  document.getElementById("leftArmOff").onclick = function () {
+    g_leftArmAnimation = false;
+  };
 
-  document.getElementById("animationMagentaOnButton").onclick = function () {g_magentaAnimation = true; };
-  document.getElementById("animationMagentaOffButton").onclick = function () { g_magentaAnimation = false; };
+
+  document.getElementById("leftHandSlide").addEventListener("mousemove", function () {
+    g_leftHandAngle = this.value;
+    renderAllShapes();
+  });
+
+  document.getElementById("leftHandOn").onclick = function () {
+    g_leftHandAnimation = true;
+  };
+
+  document.getElementById("leftHandOff").onclick = function () {
+    g_leftHandAnimation = false;
+  };
   
+  
+
 }
 
 function main() {
@@ -201,13 +218,12 @@ function tick() {
 
 function updateAnimationAngles()
 {
-  if (g_yellowAnimation) {
-    g_yellowAngle = (45*Math.sin(g_seconds));
+  if (g_leftArmAnimation){
+    g_leftArmAngle = 30 * Math.sin(g_seconds * 2 * Math.PI);
   }
 
-  if (g_magentaAnimation) {
-    g_magentaAngle = 45*Math.sin(3*g_seconds);
-  
+  if (g_leftHandAnimation){
+    g_leftHandAngle = 30 * Math.sin(g_seconds * 2 * Math.PI);
   }
 
   
@@ -215,6 +231,8 @@ function updateAnimationAngles()
 
 
 function renderAllShapes() {
+  var startTime = performance.now();
+
   var globalRotMat = new Matrix4().rotate(g_globalAngle, 0, 1, 0);
   gl.uniformMatrix4fv(u_GlobalRotateMatrix, false, globalRotMat.elements);
 
@@ -222,29 +240,81 @@ function renderAllShapes() {
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   gl.clear(gl.COLOR_BUFFER_BIT);
 
-  var body = new Cube();
-  body.color = [1.0, 0.0, 0.0, 1.0];
-  body.matrix.translate(-0.25, -0.75, 0.0);
-  body.matrix.rotate(-5, 1, 0, 0);
-  body.matrix.scale(0.5, 0.3, 0.5);
-  body.render();
+ var foxBack = new Cube();
+  foxBack.color = [0.6, 0.3, 0.1, 1];
+  foxBack.matrix.translate(0, -0.6, 0.0);
+  foxBack.matrix.rotate(0, 1, 0, 0);
+  foxBack.matrix.rotate(0, 0, 0, 1);
+  foxBack.matrix.scale(0.5,0.7,0.2);
+  foxBack.matrix.translate(-0.5,0,0);
+  foxBack.render();
 
-  var leftArm = new Cube();
-  leftArm.color = [1, 1, 0, 1];
-  leftArm.matrix.translate(0, -0.5, 0.0);
-  leftArm.matrix.rotate(-5, 1, 0, 0);
-  leftArm.matrix.rotate(-g_yellowAngle, 0, 0, 1);
-  var yellowCoordinatesMat = new Matrix4(leftArm.matrix);
-  leftArm.matrix.scale(0.25, 0.7, 0.5);
-  leftArm.matrix.translate(-0.5, 0, 0);
-  leftArm.render();
+  var foxFront = new Cube();
+  foxFront.color = [1,1,1,1];
+  foxFront.matrix.translate(0, -0.6, -0.20);
+  foxFront.matrix.rotate(0, 1, 0, 0);
+  foxFront.matrix.rotate(0, 0, 0, 1);
+  var attachHead = new Matrix4(foxFront.matrix);
+  foxFront.matrix.scale(0.5,0.7,0.2);
+  foxFront.matrix.translate(-0.5,0,0);
+  foxFront.render();
 
-  var box = new Cube();
-  box.color = [1, 0, 1, 1];
-  box.matrix = yellowCoordinatesMat;
-  box.matrix.translate(0, 0.65, 0);
-  box.matrix.rotate(g_magentaAngle, 0, 0, 1);
-  box.matrix.scale(0.3, 0.3, 0.3);
-  box.matrix.translate(-0.5, 0, -0.001);
-  box.render();
+  var foxHead = new Cube();
+  foxHead.color = [0.6,0.3,0.1,1];
+  foxHead.matrix = attachHead;
+  foxHead.matrix.translate(0, .70, -0.05);
+  foxHead.matrix.rotate(0, 0, 0, 1);
+  foxHead.matrix.scale(.5, .40, .5);
+  foxHead.matrix.translate(-.5, 0, -0.001)
+  foxHead.render();
+
+  var foxTail = new Cube();
+  foxTail.color = [0.4, 0.2, 0.1, 1];
+  var tailMatrix = new Matrix4(foxFront.matrix);
+  foxTail.matrix = tailMatrix;
+  foxTail.matrix.translate(0.4, 0.2, 2.0);
+  foxTail.matrix.rotate(10, 1, 0, 0);
+  foxTail.matrix.scale(.2, .2, 2);
+  foxTail.render();
+
+  var foxLeftArm = new Cube();
+  foxLeftArm.color = [0.6, 0.3, 0.1, 1];
+  var leftArmMatrix = new Matrix4(foxFront.matrix);
+  foxLeftArm.matrix = leftArmMatrix;
+  foxLeftArm.matrix.translate(0.8, .70, 0.5);
+  foxLeftArm.matrix.rotate(g_leftArmAngle, 0, 0, 1);
+  foxLeftArm.matrix.rotate(-25, 0, 0, 1);
+  foxLeftArm.matrix.scale(.59, .23, 1);
+  foxLeftArm.render();
+
+  var foxLeftHand = new Cube();
+  foxLeftHand.color = [0.4, 0.2, 0.1, 1];
+  foxLeftHand.matrix = leftArmMatrix; //connected to left arm
+  foxLeftHand.matrix.translate(1.0, -0.1, 0.01);
+  foxLeftHand.matrix.scale(.5, 1.2, .97);
+  foxLeftHand.matrix.rotate(g_leftHandAngle,0,1,0);
+  foxLeftHand.render();
+
+  var foxRightArm = new Cube();
+  foxRightArm.color = [0.6, 0.3, 0.1, 1];
+  var rightArmMatrix = new Matrix4(foxFront.matrix);
+  foxRightArm.matrix = rightArmMatrix;
+  foxRightArm.matrix.translate(-0.8, .70, -0.5);
+  foxLeftArm.matrix.rotate(g_leftArmAngle, 0, 0, 1);
+  foxLeftArm.matrix.rotate(-25, 0, 0, 1);
+  foxLeftArm.matrix.scale(.59, .23, 1);
+  foxRightArm.render();
+
+
+  var duration = performance.now() - startTime;
+  sendTextToHTML(" ms: " + Math.floor(duration) + " fps: " + Math.floor(10000 / duration) / 10, "theFPS");
+}
+
+function sendTextToHTML(text, htmlID) {
+  var htmlElm = document.getElementById(htmlID);
+  if (!htmlElm) {
+    console.log("Failed to get " + htmlID + " from HTML");
+    return;
+  }
+  htmlElm.innerHTML = text;
 }
